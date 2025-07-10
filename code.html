@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Track your 100 Days of Python coding challenge progress with this interactive dashboard">
+  <title>100 Days of Python Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #00d8ff;
+      --primary-dark: #0095ff;
+      --secondary: #ff2d75;
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --light: #e6f7ff;
+      --success: #4ade80;
+      --warning: #facc15;
+      --danger: #f87171;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--darker);
+      color: var(--light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(0, 216, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 45, 117, 0.1) 0%, transparent 50%);
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      width: 100%;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .logo-icon {
+      font-size: 2.5rem;
+      color: var(--primary);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: rgba(230, 247, 255, 0.7);
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      min-width: 140px;
+      text-align: center;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(230, 247, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 600px;
+      justify-content: center;
+    }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 216, 255, 0.3);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: rgba(0, 216, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .grid-container {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 2rem;
+    }
+    
+    .grid-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .view-toggle {
+      display: flex;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 2px;
+    }
+    
+    .view-toggle button {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: none;
+      color: var(--light);
+      opacity: 0.6;
+    }
+    
+    .view-toggle button.active {
+      background: rgba(255, 255, 255, 0.2);
+      opacity: 1;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 12px;
+    }
+    
+    .list-view .grid {
+      display: block;
+    }
+    
+    .list-view .day {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    
+    .day {
+      position: relative;
+      height: 80px;
+      background: var(--dark);
+      border: 2px solid #2a2a4a;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+    
+    .day:hover:not(.completed):not(.locked) {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+    
+    .day-number {
+      font-size: 1.5rem;
+      z-index: 2;
+    }
+    
+    .day-title {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+      font-weight: 400;
+      z-index: 2;
+      display: none;
+    }
+    
+    .list-view .day-title {
+      display: block;
+    }
+    
+    .day.completed {
+      background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+      color: white;
+      border-color: #16a34a;
+      cursor: default;
+    }
+    
+    .day.completed .checkmark {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      color: white;
+      font-size: 0.9rem;
+      z-index: 2;
+    }
+    
+    .day.locked {
+      background: #252538;
+      color: #555;
+      border-color: #3d3d5c;
+      cursor: not-allowed;
+    }
+    
+    .day.active {
+      animation: activeDay 1.5s infinite;
+      border-color: var(--primary);
+    }
+    
+    @keyframes activeDay {
+      0%, 100% { transform: translateY(0); box-shadow: 0 0 0 rgba(0, 216, 255, 0); }
+      50% { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 216, 255, 0.2); }
+    }
+    
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: rgba(0, 216, 255, 0.2);
+      width: 100%;
+      border-radius: 0 0 10px 10px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    
+    .message {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--light);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      font-size: 1rem;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 2rem;
+      display: none;
+    }
+    
+    .message.success {
+      background: rgba(74, 222, 128, 0.1);
+      border-color: rgba(74, 222, 128, 0.3);
+      color: var(--success);
+      display: block;
+    }
+    
+    .message.warning {
+      background: rgba(250, 204, 21, 0.1);
+      border-color: rgba(250, 204, 21, 0.3);
+      color: var(--warning);
+      display: block;
+    }
+    
+    .message.error {
+      background: rgba(248, 113, 113, 0.1);
+      border-color: rgba(248, 113, 113, 0.3);
+      color: var(--danger);
+      display: block;
+    }
+    
+    .day-details {
+      background: rgba(26, 26, 46, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      margin: 2rem auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      display: none;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .day-details h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .day-details .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: rgba(230, 247, 255, 0.6);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    .day-details .close-btn:hover {
+      color: var(--danger);
+    }
+    
+    .day-details p {
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    
+    .day-topics {
+      margin-top: 1.5rem;
+    }
+    
+    .day-topics h4 {
+      margin-bottom: 0.75rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .topics-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .topic {
+      background: rgba(0, 216, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(0, 216, 255, 0.3);
+    }
+    
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      color: rgba(230, 247, 255, 0.5);
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      }
+      
+      .day {
+        height: 70px;
+      }
+      
+      .day-number {
+        font-size: 1.2rem;
+      }
+      
+      .stats {
+        gap: 1rem;
+      }
+      
+      .stat-card {
+        min-width: 120px;
+        padding: 0.75rem 1rem;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      }
+      
+      .day {
+        height: 60px;
+      }
+      
+      .stats {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-code logo-icon"></i>
+      </div>
+      <h1>100 Days of Python Challenge</h1>
+      <p class="subtitle">Track your coding journey one day at a time</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="completedDays">0</div>
+        <div class="stat-label">Days Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="streakCount">0</div>
+        <div class="stat-label">Current Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="completionRate">0%</div>
+        <div class="stat-label">Completion</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="daysLeft">100</div>
+        <div class="stat-label">Days Left</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-primary" id="completeToday">
+        <i class="fas fa-check-circle"></i> Complete Today
+      </button>
+      <button class="btn-outline" id="resetProgress">
+        <i class="fas fa-redo"></i> Reset
+      </button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="grid-container">
+      <div class="grid-controls">
+        <div class="view-toggle">
+          <button class="active" id="gridViewBtn">
+            <i class="fas fa-th"></i>
+          </button>
+          <button id="listViewBtn">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+        <div id="currentDayInfo"></div>
+      </div>
+      
+      <div class="grid" id="dayGrid"></div>
+    </div>
+
+    <div class="day-details" id="dayDetails">
+      <button class="close-btn" id="closeDetailsBtn">
+        <i class="fas fa-times"></i>
+      </button>
+      <h3>Day <span id="detailDayNumber">1</span> Details</h3>
+      <p id="detailDescription">Loading day details...</p>
+      
+      <div class="day-topics">
+        <h4><i class="fas fa-book-open"></i> Today's Topics</h4>
+        <div class="topics-list" id="detailTopics"></div>
+      </div>
+      
+      <div class="day-topics">
+        <h4><i class="fas fa-tasks"></i> Exercises</h4>
+        <ul id="detailExercises"></ul>
+      </div>
+      
+      <button class="btn-primary" id="markCompleteBtn">
+        <i class="fas fa-check-circle"></i> Mark as Complete
+      </button>
+    </div>
+
+    <footer>
+      <p>Made with ♥ for Python learners | &copy; <span id="currentYear"></span></p>
+      <div class="deploy-instructions">
+        <h4>How to deploy:</h4>
+        <ol>
+          <li>Save this file as index.html</li>
+          <li>Upload to any static hosting service like:
+            <ul>
+              <li>GitHub Pages</li>
+              <li>Netlify</li>
+              <li>Vercel</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const grid = document.getElementById('dayGrid');
+      const message = document.getElementById('message');
+      const currentDayInfo = document.getElementById('currentDayInfo');
+      const dayDetails = document.getElementById('dayDetails');
+      const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+      const completeTodayBtn = document.getElementById('completeToday');
+      const resetProgressBtn = document.getElementById('resetProgress');
+      const markCompleteBtn = document.getElementById('markCompleteBtn');
+      const gridViewBtn = document.getElementById('gridViewBtn');
+      const listViewBtn = document.getElementById('listViewBtn');
+      
+      // Stats elements
+      const completedDaysEl = document.getElementById('completedDays');
+      const streakCountEl = document.getElementById('streakCount');
+      const completionRateEl = document.getElementById('completionRate');
+      const daysLeftEl = document.getElementById('daysLeft');
+      
+      // Constants
+      const TOTAL_DAYS = 100;
+      const STORAGE_KEY = 'python100DaysChallenge';
+      const DAY_TITLES = [
+        "Getting Started",
+        "Variables & Data Types",
+        "Control Flow",
+        "Functions",
+        "Lists & Tuples",
+        "String Manipulation",
+        "Dictionaries",
+        "Sets & File I/O",
+        "Error Handling",
+        "OOP Basics",
+        "Modules & Packages",
+        "List Comprehensions",
+        "Lambda Functions",
+        "Generators",
+        "Decorators",
+        "Working with Dates",
+        "Regular Expressions",
+        "Web Scraping",
+        "JSON & APIs",
+        "Virtual Environments",
+        "Debugging",
+        "Testing Basics",
+        "Test Driven Development",
+        "Command Line Apps",
+        "Working with CSV",
+        "Working with Excel",
+        "Working with PDFs",
+        "Working with Images",
+        "Basics of NumPy",
+        "Basics of Pandas",
+        "Data Visualization",
+        "Advanced OOP",
+        "Design Patterns",
+        "Memory Management",
+        "Concurrency Basics",
+        "Threading",
+        "Multiprocessing",
+        "AsyncIO",
+        "Networking",
+        "Sockets",
+        "Web Frameworks",
+        "Flask Basics",
+        "Django Basics",
+        "REST APIs",
+        "Authentication",
+        "Databases & ORMs",
+        "SQLite",
+        "PostgreSQL",
+        "MongoDB",
+        "Redis",
+        "Data Analysis",
+        "Machine Learning",
+        "Scikit-learn",
+        "TensorFlow",
+        "Computer Vision",
+        "Natural Language",
+        "Web Automation",
+        "GUI Development",
+        "Desktop Apps",
+        "Game Development",
+        "Blockchain Basics",
+        "Package Creation",
+        "Documentation",
+        "Code Optimization",
+        "Profiling",
+        "Deployment",
+        "Docker Basics",
+        "Cloud Computing",
+        "Serverless",
+        "CI/CD",
+        "Open Source",
+        "Code Reviews",
+        "Pair Programming",
+        "Algorithms I",
+        "Algorithms II",
+        "Data Structures I",
+        "Data Structures II",
+        "Graph Theory",
+        "Dynamic Programming",
+        "System Design",
+        "Architecture",
+        "Security Basics",
+        "Cryptography",
+        "Ethical Hacking",
+        "Reverse Engineering",
+        "Embedded Python",
+        "Microservices",
+        "Message Queues",
+        "Big Data",
+        "Python in Science",
+        "Python in Finance",
+        "Automation",
+        "Scripting",
+        "Design Patterns II",
+        "Best Practices",
+        "Advanced Topics",
+        "Personal Project",
+        "Personal Project",
+        "Final Project"
+      ];
+      
+      const DAY_DESCRIPTIONS = [
+        "Set up your development environment and write your first Python program. Learn about Python syntax and basic printing.",
+        "Learn about different data types in Python and how to use variables to store information.",
+        "Understand how to control the flow of your program with conditionals and loops.",
+        "Learn how to define and call functions to organize and reuse your code.",
+        "Work with ordered collections of items using lists and tuples.",
+        "Explore Python's powerful string manipulation capabilities.",
+        "Store data as key-value pairs with Python dictionaries.",
+        "Learn about sets and how to read from and write to files.",
+        "Handle errors and exceptions gracefully in your Python programs.",
+        "Introduction to Object-Oriented Programming in Python.",
+      ];
+      
+      // Fill the rest with placeholder descriptions
+      for (let i = DAY_DESCRIPTIONS.length; i < TOTAL_DAYS; i++) {
+        DAY_DESCRIPTIONS.push(`This is day ${i+1} of your Python learning journey. More details coming soon!`);
+      }
+      
+      const TOPICS = [
+        ["Installation", "Printing", "Variables"],
+        ["Data Types", "Type Conversion", "Comments"],
+        ["If Statements", "Loops", "Boolean Logic"],
+        ["Function Definition", "Parameters", "Return"],
+        ["Lists", "Tuples", "Indexing"],
+        ["String Methods", "Formatting", "Escaping"],
+        ["Dictionaries", "Keys & Values", "Methods"],
+        ["Sets", "File I/O", "Context Managers"],
+        ["Try/Except", "Raise", "Custom Errors"],
+        ["Classes", "Objects", "Methods"],
+      ];
+      
+      // Fill the rest with placeholder topics
+      for (let i = TOPICS.length; i < TOTAL_DAYS; i++) {
+        TOPICS.push(["Topic 1", "Topic 2", "Topic 3"]);
+      }
+      
+      // State management
+      let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+        completedDays: [],
+        streak: 0,
+        lastCompletedAt: null,
+        viewMode: 'grid' // 'grid' or 'list'
+      };
+      
+      let currentOpenDay = null;
+      
+      // Initialize
+      updateStats();
+      updateGrid();
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      
+      // Adjust grid view based on preference
+      if (state.viewMode === 'list') {
+        grid.parentElement.classList.add('list-view');
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+      }
+      
+      // Event Listeners
+      closeDetailsBtn.addEventListener('click', closeDayDetails);
+      completeTodayBtn.addEventListener('click', completeCurrentDay);
+      resetProgressBtn.addEventListener('click', resetProgress);
+      markCompleteBtn.addEventListener('click', markDayComplete);
+      gridViewBtn.addEventListener('click', () => setViewMode('grid'));
+      listViewBtn.addEventListener('click', () => setViewMode('list'));
+      
+      // Functions
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        updateStats();
+      }
+      
+      function updateStats() {
+        const percentCompleted = Math.round((state.completedDays.length / TOTAL_DAYS) * 100);
+        completedDaysEl.textContent = state.completedDays.length;
+        streakCountEl.textContent = state.streak;
+        completionRateEl.textContent = percentCompleted + '%';
+        daysLeftEl.textContent = TOTAL_DAYS - state.completedDays.length;
+      }
+      
+      function calculateStreak() {
+        if (!state.lastCompletedAt) return 0;
+        
+        const last = new Date(state.lastCompletedAt);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // If last completion was today, return current streak
+        if (last.toDateString() === today.toDateString()) {
+          return state.streak;
+        }
+        
+        // Check if last completion was yesterday (maintain streak)
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (last.toDateString() === yesterday.toDateString()) {
+          return state.streak + 1;
+        }
+        
+        // Otherwise, reset streak
+        return 1;
+      }
+      
+      function canCompleteToday() {
+        if (state.completedDays.length === 0) {
+          return true; // First day can always be completed
+        }
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Check if today is already completed
+        for (const day of state.completedDays) {
+          const completedDate = new Date(day.date);
+          completedDate.setHours(0, 0, 0, 0);
+          
+          if (completedDate.getTime() === today.getTime()) {
+            return false;
+          }
+        }
+        
+        return true;
+      }
+      
+      function getCurrentDayToComplete() {
+        if (state.completedDays.length === 0) return 1;
+        
+        const dayNumbers = state.completedDays.map(d => d.day);
+        dayNumbers.sort((a, b) => a - b);
+        
+        // Find the first gap in day numbers
+        for (let i = 0; i < dayNumbers.length; i++) {
+          if (dayNumbers[i] !== i + 1) {
+            return i + 1;
+          }
+        }
+        
+        // If no gaps, return next day
+        return dayNumbers.length + 1;
+      }
+      
+      function updateGrid() {
+        grid.innerHTML = '';
+        
+        for (let i = 1; i <= TOTAL_DAYS; i++) {
+          const dayEl = document.createElement('div');
+          dayEl.className = 'day';
+          dayEl.innerHTML = `
+            <div class="day-number">${i}</div>
+            <div class="day-title">${DAY_TITLES[i-1] || `Day ${i}`}</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+          `;
+          
+          // Check if day is completed
+          const isCompleted = state.completedDays.some(d => d.day === i);
+          
+          if (isCompleted) {
+            dayEl.classList.add('completed');
+            dayEl.innerHTML += `<i class="fas fa-check-circle checkmark"></i>`;
+            const completedData = state.completedDays.find(d => d.day === i);
+            if (completedData && completedData.progress) {
+              dayEl.querySelector('.progress-fill').style.width = completedData.progress + '%';
+            } else {
+              dayEl.querySelector('.progress-fill').style.width = '100%';
+            }
+          } else {
+            const currentDay = getCurrentDayToComplete();
+            if (i === currentDay && canCompleteToday()) {
+              dayEl.classList.add('active');
+              currentDayInfo.textContent = `Current Day: ${i} - ${DAY_TITLES[i-1] || `Day ${i}`}`;
+            }
+            
+            if (i > currentDay || !canCompleteToday()) {
+              dayEl.classList.add('locked');
+            }
+          }
+          
+          dayEl.addEventListener('click', () => openDayDetails(i));
+          grid.appendChild(dayEl);
+        }
+      }
+      
+      function openDayDetails(dayNumber) {
+        const dayEls = document.querySelectorAll('.day');
+        dayEls.forEach(el => el.classList.remove('selected'));
+        
+        currentOpenDay = dayNumber;
+        document.getElementById('detailDayNumber').textContent = dayNumber;
+        document.getElementById('detailDescription').textContent = DAY_DESCRIPTIONS[dayNumber-1];
+        
+        // Update topics
+        const topicsContainer = document.getElementById('detailTopics');
+        topicsContainer.innerHTML = '';
+        (TOPICS[dayNumber-1] || []).forEach(topic => {
+          const topicEl = document.createElement('div');
+          topicEl.className = 'topic';
+          topicEl.textContent = topic;
+          topicsContainer.appendChild(topicEl);
+        });
+        
+        // Update exercises
+        const exercisesContainer = document.getElementById('detailExercises');
+        exercisesContainer.innerHTML = `
+          <li>Practice exercise 1</li>
+          <li>Practice exercise 2</li>
+          <li>Mini project</li>
+        `;
+        
+        // Update complete button
+        const isCompleted = state.completedDays.some(d => d.day === dayNumber);
+        if (isCompleted) {
+          markCompleteBtn.disabled = true;
+          markCompleteBtn.textContent = 'Completed';
+          markCompleteBtn.classList.add('completed');
+        } else {
+          const currentDay = getCurrentDayToComplete();
+          if (dayNumber === currentDay && canCompleteToday()) {
+            markCompleteBtn.disabled = false;
+            markCompleteBtn.textContent = 'Mark as Complete';
+            markCompleteBtn.classList.remove('completed');
+          } else {
+            markCompleteBtn.disabled = true;
+            markCompleteBtn.textContent = dayNumber < currentDay ? 'Already Passed' : 'Complete Previous Days First';
+            markCompleteBtn.classList.add('disabled');
+          }
+        }
+        
+        dayDetails.style.display = 'block';
+      }
+      
+      function closeDayDetails() {
+        dayDetails.style.display = 'none';
+        currentOpenDay = null;
+      }
+      
+      function completeCurrentDay() {
+        const dayNumber = getCurrentDayToComplete();
+        
+        if (!canCompleteToday()) {
+          showMessage('You have already completed a day today!', 'error');
+          return;
+        }
+        
+        const today = new Date();
+        state.completedDays.push({
+          day: dayNumber,
+          date: today.toISOString(),
+          progress: 100
+        });
+        
+        state.streak = calculateStreak();
+        state.lastCompletedAt = today.toISOString();
+        saveState();
+        
+        showMessage(`Day ${dayNumber} marked as complete! Keep going!`, 'success');
+        updateGrid();
+      }
+      
+      function markDayComplete() {
+        if (currentOpenDay === null) return;
+        
+        const dayNumber = currentOpenDay;
+        const currentDay = getCurrentDayToComplete();
+        
+        if (dayNumber !== currentDay) {
+          showMessage(`Please complete Day ${currentDay} first!`, 'warning');
+          return;
+        }
+        
+        if (!canCompleteToday()) {
+          showMessage('You have already completed a day today!', 'error');
+          return;
+        }
+        
+        const today = new Date();
+        state.completedDays.push({
+          day: dayNumber,
+          date: today.toISOString(),
+          progress: 100
+        });
+        
+        state.streak = calculateStreak();
+        state.lastCompletedAt = today.toISOString();
+        saveState();
+        
+        showMessage(`Day ${dayNumber} marked as complete! Great job!`, 'success');
+        updateGrid();
+        closeDayDetails();
+      }
+      
+      function resetProgress() {
+        if (confirm('Are you sure you want to reset all your progress? This cannot be undone.')) {
+          state = {
+            completedDays: [],
+            streak: 0,
+            lastCompletedAt: null,
+            viewMode: state.viewMode
+          };
+          
+          saveState();
+          showMessage('Progress has been reset. Start fresh!', 'warning');
+          updateGrid();
+        }
+      }
+      
+      function showMessage(text, type) {
+        message.textContent = text;
+        message.className = 'message ' + type;
+        
+        setTimeout(() => {
+          message.style.opacity = '0';
+          setTimeout(() => {
+            message.style.display = 'none';
+            message.style.opacity = '1';
+          }, 300);
+        }, 3000);
+      }
+      
+      function setViewMode(mode) {
+        state.viewMode = mode;
+        saveState();
+        
+        if (mode === 'grid') {
+          grid.parentElement.classList.remove('list-view');
+          gridViewBtn.classList.add('active');
+          listViewBtn.classList.remove('active');
+        } else {
+          grid.parentElement.classList.add('list-view');
+          listViewBtn.classList.add('active');
+          gridViewBtn.classList.remove('active');
+        }
+        
+        updateGrid();
+      }
+    });
+  </script>
+  <script>
+    // Deployment helper - console instructions
+    console.log('Deployment options:');
+    console.log('1. GitHub Pages: https://pages.github.com/');
+    console.log('2. Netlify: https://www.netlify.com/');
+    console.log('3. Vercel: https://vercel.com/');
+    console.log('Simply upload this HTML file to any of these services for free hosting!');
+  </script>
+</body>
+</html>
